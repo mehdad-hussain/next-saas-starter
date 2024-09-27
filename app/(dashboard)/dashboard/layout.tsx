@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Activity, Menu, Settings, Shield, Users } from "lucide-react";
+import { Activity, BookOpen, Menu, Settings, Shield, UserPlus, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -15,10 +15,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { href: "/dashboard/general", icon: Settings, label: "General" },
         { href: "/dashboard/activity", icon: Activity, label: "Activity" },
         { href: "/dashboard/security", icon: Shield, label: "Security" },
-        { href: "/dashboard/blog", icon: Activity, label: "Blogs" },
-        { href: "/dashboard/role", icon: Activity, label: "Roles" },
+        { href: "/dashboard/blog", icon: BookOpen, label: "Blogs" },
+        { href: "/dashboard/role", icon: UserPlus, label: "Roles" },
     ];
-
     return (
         <div className="flex flex-col min-h-[calc(100dvh-68px)] max-w-7xl mx-auto w-full">
             {/* Mobile header */}

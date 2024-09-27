@@ -12,7 +12,7 @@ import { type GetBlogsSchema } from "@/lib/db/validations";
 
 export async function getBlogs(input: GetBlogsSchema) {
     noStore();
-    const { page, per_page, sort, title, state } = input;
+    const { page, per_page, sort, title, state, operator } = input;
 
     try {
         // Offset to paginate the results
@@ -39,7 +39,7 @@ export async function getBlogs(input: GetBlogsSchema) {
                   })
                 : undefined,
         ];
-        const where: DrizzleWhere<BlogPost> = expressions[0] ? and(...expressions) : or(...expressions);
+        const where: DrizzleWhere<BlogPost> = !operator || operator === "and" ? and(...expressions) : or(...expressions);
 
         // Transaction is used to ensure both queries are executed in a single transaction
         const { data, total } = await db.transaction(async (tx) => {
@@ -76,21 +76,5 @@ export async function getBlogs(input: GetBlogsSchema) {
         return { data, pageCount };
     } catch (err) {
         return { data: [], pageCount: 0 };
-    }
-}
-
-export async function getBlogCountByState() {
-    noStore();
-    try {
-        return await db
-            .select({
-                status: blogPosts.state,
-                count: count(),
-            })
-            .from(blogPosts)
-            .groupBy(blogPosts.state)
-            .execute();
-    } catch (err) {
-        return [];
     }
 }

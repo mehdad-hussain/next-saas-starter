@@ -4,6 +4,8 @@ import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "next-themes";
 import { Manrope } from "next/font/google";
 import "./globals.css";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
     title: "Next.js SaaS Starter",
@@ -23,7 +25,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <html lang="en" className={`bg-white dark:bg-gray-950 text-black dark:text-white ${manrope.className}`}>
             <body className="min-h-[100dvh] bg-gray-50">
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-                    <UserProvider userPromise={userPromise}>{children}</UserProvider>
+                    <UserProvider userPromise={userPromise}>
+                        <Toaster />
+                        <TooltipProvider>{children}</TooltipProvider>
+                    </UserProvider>
                 </ThemeProvider>
             </body>
         </html>
