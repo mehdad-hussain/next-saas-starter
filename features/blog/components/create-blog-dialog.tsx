@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, ReloadIcon } from "@radix-ui/react-icons";
-import * as React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -29,17 +28,23 @@ import {
 } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
+import { useUser } from "@/lib/auth";
 import { createBlogSchema, type CreateBlogSchema } from "@/lib/db/validations";
+import { useState, useTransition } from "react";
 import { createBlog } from "../api/actions";
 import { CreateBlogForm } from "./create-blog-form";
 
 export function CreateBlogDialog() {
-    const [open, setOpen] = React.useState(false);
-    const [isCreatePending, startCreateTransition] = React.useTransition();
+    const [open, setOpen] = useState(false);
+    const [isCreatePending, startCreateTransition] = useTransition();
     const isDesktop = useMediaQuery("(min-width: 640px)");
+    const { user } = useUser();
 
     const form = useForm<CreateBlogSchema>({
         resolver: zodResolver(createBlogSchema),
+        defaultValues: {
+            authorId: user?.id ?? 0,
+        },
     });
 
     function onSubmit(input: CreateBlogSchema) {

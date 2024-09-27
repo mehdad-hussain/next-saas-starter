@@ -8,16 +8,18 @@ import { getErrorMessage } from "@/lib/handle-error";
 
 import { db } from "@/lib/db/drizzle";
 import type { CreateBlogSchema, UpdateBlogSchema } from "@/lib/db/validations";
+import { generateSlug } from "@/lib/utils";
 
 export async function createBlog(input: CreateBlogSchema) {
     noStore();
     try {
+        const slug = input.slug ?? generateSlug(input.title);
         await db.transaction(async (tx) => {
-            const [newBlog] = await tx
+            await tx
                 .insert(blogPosts)
                 .values({
                     title: input.title,
-                    slug: input.slug,
+                    slug,
                     featureImage: input.featureImage,
                     state: input.state,
                     authorId: input.authorId,
@@ -71,7 +73,12 @@ export async function updateBlog(input: UpdateBlogSchema & { id: number }) {
 export async function deleteBlog(input: { id: number }) {
     try {
         await db.transaction(async (tx) => {
-            await tx.delete(blogPosts).where(eq(blogPosts.id, input.id));
+            await tx
+                .update(blogPosts)
+                .set({
+                    isDeleted: true,
+                })
+                .where(eq(blogPosts.id, input.id));
         });
 
         revalidatePath("/dashboard/blog");
@@ -91,10 +98,15 @@ export async function deleteBlog(input: { id: number }) {
 export async function deleteBlogs(input: { ids: number[] }) {
     try {
         await db.transaction(async (tx) => {
-            await tx.delete(blogPosts).where(inArray(blogPosts.id, input.ids));
+            await tx
+                .update(blogPosts)
+                .set({
+                    isDeleted: true,
+                })
+                .where(inArray(blogPosts.id, input.ids));
         });
 
-        revalidatePath("/");
+        revalidatePath("/dashboard/blog");
 
         return {
             data: null,
@@ -116,7 +128,8 @@ export async function getChunkedBlogs(input: { chunkSize?: number } = {}) {
             .select({
                 count: count(),
             })
-            .from(blogPosts);
+            .from(blogPosts)
+            .where(eq(blogPosts.isDeleted, false));
 
         const totalChunks = Math.ceil(totalBlogs.count / chunkSize);
 
@@ -126,6 +139,7 @@ export async function getChunkedBlogs(input: { chunkSize?: number } = {}) {
             chunkedBlogs = await db
                 .select()
                 .from(blogPosts)
+                .where(eq(blogPosts.isDeleted, false))
                 .limit(chunkSize)
                 .offset(i * chunkSize)
                 .then((blogs) =>
@@ -137,6 +151,7 @@ export async function getChunkedBlogs(input: { chunkSize?: number } = {}) {
                 );
         }
 
+        console.log("🚀 ~ getChunkedBlogs ~ chunkedBlogs:", chunkedBlogs);
         return {
             data: chunkedBlogs,
             error: null,

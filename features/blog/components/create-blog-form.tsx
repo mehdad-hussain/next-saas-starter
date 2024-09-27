@@ -7,7 +7,6 @@ import { type UseFormReturn } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useUser } from "@/lib/auth";
 import { type CreateBlogSchema } from "@/lib/db/validations";
 
 interface CreateBlogFormProps extends Omit<React.ComponentPropsWithRef<"form">, "onSubmit"> {
@@ -17,20 +16,9 @@ interface CreateBlogFormProps extends Omit<React.ComponentPropsWithRef<"form">, 
 }
 
 export function CreateBlogForm({ form, onSubmit, children }: CreateBlogFormProps) {
-    const { user } = useUser();
     return (
         <Form {...form}>
-            <form
-                onSubmit={(event) => {
-                    event.preventDefault();
-                    form.setValue("authorId", user?.id ?? 0);
-                    form.setValue("slug", form.getValues("title").replace(/\s+/g, "-").toLowerCase());
-                    console.log("Form values:", form.getValues());
-                    console.log("Form errors:", form.formState.errors);
-                    form.handleSubmit(onSubmit)(event);
-                }}
-                className="flex flex-col gap-4"
-            >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
                 <FormField
                     control={form.control}
                     name="title"
@@ -77,6 +65,6 @@ export function CreateBlogForm({ form, onSubmit, children }: CreateBlogFormProps
     );
 }
 
-// todo: feature image, create form error validation, slug and author id issue
+// todo: feature image
 
-// todo: table schema as sazid
+// todo: add isDeleted logic

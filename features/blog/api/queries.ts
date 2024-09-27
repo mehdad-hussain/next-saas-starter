@@ -2,7 +2,7 @@ import "server-only";
 
 import { blogPosts, type BlogPost } from "@/lib/db/schema";
 import { type DrizzleWhere } from "@/types";
-import { and, asc, count, desc, or, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, or, type SQL } from "drizzle-orm";
 import { unstable_noStore as noStore } from "next/cache";
 
 import { filterColumn } from "@/lib/filter-column";
@@ -41,14 +41,13 @@ export async function getBlogs(input: GetBlogsSchema) {
         ];
         const where: DrizzleWhere<BlogPost> = !operator || operator === "and" ? and(...expressions) : or(...expressions);
 
-        // Transaction is used to ensure both queries are executed in a single transaction
         const { data, total } = await db.transaction(async (tx) => {
             const data = await tx
                 .select()
                 .from(blogPosts)
                 .limit(per_page)
                 .offset(offset)
-                .where(where)
+                .where(and(where, eq(blogPosts.isDeleted, false)))
                 .orderBy(
                     column && column in blogPosts
                         ? order === "asc"
@@ -62,7 +61,7 @@ export async function getBlogs(input: GetBlogsSchema) {
                     count: count(),
                 })
                 .from(blogPosts)
-                .where(where)
+                .where(and(where, eq(blogPosts.isDeleted, false)))
                 .execute()
                 .then((res) => res[0]?.count ?? 0);
 
