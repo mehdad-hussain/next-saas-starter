@@ -1,15 +1,32 @@
 "use server";
 
-import { blogPosts } from "@/lib/db/schema";
+import { db } from "@/lib/db/drizzle";
+import { activityLogs, ActivityType, blogPosts, permissions, teamMembers, teams, users, type NewActivityLog } from "@/lib/db/schema";
+import type { CreateBlogSchema, UpdateBlogSchema } from "@/lib/db/validations";
+import { getErrorMessage } from "@/lib/handle-error";
+import { generateSlug } from "@/lib/utils";
 import { and, eq, inArray } from "drizzle-orm";
 import { unstable_noStore as noStore, revalidatePath } from "next/cache";
 
-import { getErrorMessage } from "@/lib/handle-error";
+async function logActivity(
+    teamId: number | null | undefined,
+    userId: number,
+    entityType: string,
+    entityId: number,
+    action: ActivityType,
+    ipAddress?: string,
+) {
+    const newActivity: NewActivityLog = {
+        teamId: teamId as number,
+        userId,
+        entityType,
+        entityId,
+        action,
+        ipAddress: ipAddress || "",
+    };
 
-import { db } from "@/lib/db/drizzle";
-import { permissions, users } from "@/lib/db/schema";
-import type { CreateBlogSchema, UpdateBlogSchema } from "@/lib/db/validations";
-import { generateSlug } from "@/lib/utils";
+    await db.insert(activityLogs).values(newActivity);
+}
 
 export async function hasPermission(userId: number, entityName: string, action: "create" | "read" | "update" | "delete") {
     try {
@@ -67,8 +84,8 @@ export async function createBlog(input: CreateBlogSchema, userId: number) {
 
     try {
         const slug = input.slug ?? generateSlug(input.title);
-        await db.transaction(async (tx) => {
-            await tx
+        const newBlogPost = await db.transaction(async (tx) => {
+            const result = await tx
                 .insert(blogPosts)
                 .values({
                     title: input.title,
@@ -79,8 +96,25 @@ export async function createBlog(input: CreateBlogSchema, userId: number) {
                 })
                 .returning({
                     id: blogPosts.id,
+                    title: blogPosts.title,
+                    slug: blogPosts.slug,
+                    featureImage: blogPosts.featureImage,
+                    state: blogPosts.state,
+                    authorId: blogPosts.authorId,
                 });
+            return result[0];
         });
+
+        const [userWithTeam] = await db
+            .select({
+                teamId: teams.id,
+            })
+            .from(teams)
+            .leftJoin(teamMembers, eq(teamMembers.teamId, teams.id))
+            .where(eq(teamMembers.userId, userId))
+            .limit(1);
+
+        await logActivity(userWithTeam.teamId, userId, "blog_post", newBlogPost.id, ActivityType.CREATE_BLOG_POST);
 
         revalidatePath("/dashboard/blog");
 
@@ -120,6 +154,34 @@ export async function updateBlog(input: UpdateBlogSchema & { id: number }, userI
                 state: input.state,
             })
             .where(eq(blogPosts.id, input.id));
+
+        const [userWithTeam] = await db
+            .select({
+                teamId: teams.id,
+            })
+            .from(teams)
+            .leftJoin(teamMembers, eq(teamMembers.teamId, teams.id))
+            .where(eq(teamMembers.userId, userId))
+            .limit(1);
+
+        let activityType: ActivityType;
+        switch (input.state) {
+            case "published":
+                activityType = ActivityType.PUBLISH_BLOG_POST;
+                break;
+            case "archived":
+                activityType = ActivityType.ARCHIVE_BLOG_POST;
+                break;
+            case "unpublished":
+                activityType = ActivityType.UNPUBLISHED_BLOG_POST;
+                break;
+            case "draft":
+            default:
+                activityType = ActivityType.UPDATE_BLOG_POST;
+                break;
+        }
+
+        await logActivity(userWithTeam.teamId, userId, "blog_post", input.id, activityType);
 
         revalidatePath("/dashboard/blog");
 
@@ -184,6 +246,19 @@ export async function deleteBlogs(input: { ids: number[] }, userId: number) {
                 })
                 .where(inArray(blogPosts.id, input.ids));
         });
+
+        const [userWithTeam] = await db
+            .select({
+                teamId: teams.id,
+            })
+            .from(teams)
+            .leftJoin(teamMembers, eq(teamMembers.teamId, teams.id))
+            .where(eq(teamMembers.userId, userId))
+            .limit(1);
+
+        for (const blogId of input.ids) {
+            await logActivity(userWithTeam.teamId, userId, "blog_post", blogId, ActivityType.DELETE_BLOG_POST);
+        }
 
         revalidatePath("/dashboard/blog");
 
