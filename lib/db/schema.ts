@@ -130,7 +130,6 @@ export const teamsRelations = relations(teams, ({ many }) => ({
     teamMembers: many(teamMembers),
     activityLogs: many(activityLogs),
     invitations: many(invitations),
-    blogPosts: many(blogPosts),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -221,3 +220,10 @@ export enum ActivityType {
 
 export type BlogPost = typeof blogPosts.$inferSelect;
 export type NewBlogPost = typeof blogPosts.$inferInsert;
+
+export type Role = typeof roles.$inferSelect;
+export type NewRole = typeof roles.$inferInsert;
+export type PermissionEntity = typeof permissionEntities.$inferSelect;
+export type NewPermissionEntity = typeof permissionEntities.$inferInsert;
+export type RolePermission = typeof rolePermissions.$inferSelect;
+export type NewRolePermission = typeof rolePermissions.$inferInsert;

@@ -76,3 +76,7 @@ export function CreateBlogForm({ form, onSubmit, children }: CreateBlogFormProps
         </Form>
     );
 }
+
+// todo: feature image, create form error validation, slug and author id issue
+
+// todo: table schema as sazid
