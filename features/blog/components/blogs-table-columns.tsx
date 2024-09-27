@@ -26,6 +26,7 @@ import {
 import { getErrorMessage } from "@/lib/handle-error";
 import { formatDate } from "@/lib/utils";
 
+import usePermissionStore from "@/store/user-permission-store";
 import Image from "next/image";
 import { updateBlog } from "../api/actions";
 import { DeleteBlogsDialog } from "./delete-blogs-dialog";
@@ -113,6 +114,9 @@ export function getColumns(): ColumnDef<BlogPost>[] {
                 const [isUpdatePending, startUpdateTransition] = React.useTransition();
                 const [showUpdateBlogSheet, setShowUpdateBlogSheet] = React.useState(false);
                 const [showDeleteBlogsDialog, setShowDeleteBlogsDialog] = React.useState(false);
+                const { currentUserPermissions } = usePermissionStore();
+
+                const blogPostPermission = currentUserPermissions.find((permission) => permission.entityName === "blog-post");
 
                 return (
                     <>
@@ -131,7 +135,10 @@ export function getColumns(): ColumnDef<BlogPost>[] {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-40">
-                                <DropdownMenuItem onSelect={() => setShowUpdateBlogSheet(true)}>Edit</DropdownMenuItem>
+                                <DropdownMenuItem onSelect={() => setShowUpdateBlogSheet(true)} disabled={!blogPostPermission?.canUpdate}>
+                                    Edit
+                                </DropdownMenuItem>
+
                                 <DropdownMenuSub>
                                     <DropdownMenuSubTrigger>State</DropdownMenuSubTrigger>
                                     <DropdownMenuSubContent>
@@ -158,7 +165,7 @@ export function getColumns(): ColumnDef<BlogPost>[] {
                                                     key={state}
                                                     value={state}
                                                     className="capitalize"
-                                                    disabled={isUpdatePending}
+                                                    disabled={isUpdatePending || !blogPostPermission?.canUpdate}
                                                 >
                                                     {state}
                                                 </DropdownMenuRadioItem>
@@ -166,8 +173,10 @@ export function getColumns(): ColumnDef<BlogPost>[] {
                                         </DropdownMenuRadioGroup>
                                     </DropdownMenuSubContent>
                                 </DropdownMenuSub>
+
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem onSelect={() => setShowDeleteBlogsDialog(true)}>
+
+                                <DropdownMenuItem onSelect={() => setShowDeleteBlogsDialog(true)} disabled={!blogPostPermission?.canDelete}>
                                     Delete
                                     <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
                                 </DropdownMenuItem>
@@ -176,6 +185,7 @@ export function getColumns(): ColumnDef<BlogPost>[] {
                     </>
                 );
             },
+
             size: 40,
         },
     ];

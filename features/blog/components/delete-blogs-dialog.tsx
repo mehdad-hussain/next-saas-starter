@@ -36,9 +36,10 @@ interface DeleteBlogsDialogProps extends React.ComponentPropsWithoutRef<typeof D
     blogs: Row<BlogPost>["original"][];
     showTrigger?: boolean;
     onSuccess?: () => void;
+    disabled?: boolean;
 }
 
-export function DeleteBlogsDialog({ blogs, showTrigger = true, onSuccess, ...props }: DeleteBlogsDialogProps) {
+export function DeleteBlogsDialog({ blogs, showTrigger = true, onSuccess, disabled, ...props }: DeleteBlogsDialogProps) {
     const [isDeletePending, startDeleteTransition] = React.useTransition();
     const isDesktop = useMediaQuery("(min-width: 640px)");
 
@@ -64,7 +65,7 @@ export function DeleteBlogsDialog({ blogs, showTrigger = true, onSuccess, ...pro
             <Dialog {...props}>
                 {showTrigger ? (
                     <DialogTrigger asChild>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" disabled={disabled}>
                             <TrashIcon className="mr-2 size-4" aria-hidden="true" />
                             Delete ({blogs.length})
                         </Button>

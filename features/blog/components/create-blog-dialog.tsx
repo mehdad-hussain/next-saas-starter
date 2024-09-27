@@ -34,7 +34,11 @@ import { useState, useTransition } from "react";
 import { createBlog } from "../api/actions";
 import { CreateBlogForm } from "./create-blog-form";
 
-export function CreateBlogDialog() {
+type Props = {
+    disabled?: boolean;
+};
+
+export function CreateBlogDialog({ disabled }: Props) {
     const [open, setOpen] = useState(false);
     const [isCreatePending, startCreateTransition] = useTransition();
     const isDesktop = useMediaQuery("(min-width: 640px)");
@@ -66,7 +70,7 @@ export function CreateBlogDialog() {
         return (
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" disabled={disabled}>
                         <PlusIcon className="mr-2 size-4" aria-hidden="true" />
                         New blog
                     </Button>

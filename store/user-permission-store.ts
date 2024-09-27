@@ -10,15 +10,32 @@ interface Permission {
     canRead: boolean;
 }
 
+type CurrentUserPermission = {
+    roleName: string | null;
+    canCreate: boolean | null;
+    canRead: boolean | null;
+    canUpdate: boolean | null;
+    canDelete: boolean | null;
+    entityName: string | null;
+    entityType: "collection" | "single" | "plugin" | "settings" | null;
+};
+
 interface PermissionStore {
     permissions: Permission[];
     setPermissions: (permissions: Permission[]) => void;
     togglePermission: (id: number, permissionType: keyof Permission) => void;
+
+    currentUserPermissions: CurrentUserPermission[];
+    setCurrentUserPermissions: (permissions: CurrentUserPermission[]) => void;
 }
 
 const usePermissionStore = create<PermissionStore>((set) => ({
     permissions: [],
     setPermissions: (permissions) => set({ permissions }),
+
+    currentUserPermissions: [],
+    setCurrentUserPermissions: (permissions) => set({ currentUserPermissions: permissions }),
+
     togglePermission: (id, permissionType) =>
         set((state) => {
             const updatedPermissions = state.permissions.map((perm) => {

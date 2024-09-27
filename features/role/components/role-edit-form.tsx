@@ -20,7 +20,7 @@ type Props = {
 };
 
 const RoleEditForm = ({ roleData }: Props) => {
-    const { setPermissions, permissions } = usePermissionStore();
+    const { setPermissions, permissions, setCurrentUserPermissions } = usePermissionStore();
     const [isUpdatePending, startUpdateTransition] = useTransition();
 
     // Initialize the form with validation
@@ -55,6 +55,13 @@ const RoleEditForm = ({ roleData }: Props) => {
                 toast.error(error);
                 return;
             }
+            const currentUserPermissions = data.permissions.map(({ id, ...rest }) => ({
+                ...rest,
+                roleName: data.role.name,
+                entityType: rest.entityType as "collection" | "single" | "plugin" | "settings" | null,
+            }));
+
+            setCurrentUserPermissions(currentUserPermissions);
 
             form.reset(
                 {

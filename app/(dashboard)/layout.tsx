@@ -1,20 +1,24 @@
 "use client";
 
-import { signOut } from "@/app/(login)/actions";
+import { getCurrentUserPermissions, signOut } from "@/app/(login)/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useUser } from "@/lib/auth";
+import { getErrorMessage } from "@/lib/handle-error";
+import usePermissionStore from "@/store/user-permission-store";
 import { CircleIcon, Home, LogOut, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { user, setUser } = useUser();
     const router = useRouter();
+    const { setCurrentUserPermissions } = usePermissionStore();
 
     const { setTheme } = useTheme();
 
@@ -23,6 +27,25 @@ function Header() {
         await signOut();
         router.push("/");
     }
+
+    useEffect(() => {
+        const fetchPermissions = async () => {
+            if (user?.id) {
+                try {
+                    const result = await getCurrentUserPermissions(user.id);
+                    if (result.data) {
+                        setCurrentUserPermissions(result.data);
+                    }
+                } catch (err) {
+                    toast.error(getErrorMessage(err));
+                }
+            }
+        };
+
+        if (user?.id) {
+            fetchPermissions();
+        }
+    }, [user?.id, setCurrentUserPermissions]);
 
     return (
         <header className="border-b border-gray-200">

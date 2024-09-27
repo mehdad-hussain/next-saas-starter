@@ -8,6 +8,8 @@ import {
     activityLogs,
     ActivityType,
     invitations,
+    permissions,
+    roles,
     teamMembers,
     teams,
     User,
@@ -17,6 +19,7 @@ import {
     type NewTeamMember,
     type NewUser,
 } from "@/lib/db/schema";
+import { getErrorMessage } from "@/lib/handle-error";
 import { createCheckoutSession } from "@/lib/payments/stripe";
 import { and, eq, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
@@ -334,3 +337,33 @@ export const inviteTeamMember = validatedActionWithUser(inviteTeamMemberSchema, 
 
     return { success: "Invitation sent successfully" };
 });
+
+export const getCurrentUserPermissions = async (userId: number) => {
+    try {
+        // Retrieve the user's role name and their permissions
+        const userPermissions = await db
+            .select({
+                roleName: roles.name,
+                canCreate: permissions.canCreate,
+                canRead: permissions.canRead,
+                canUpdate: permissions.canUpdate,
+                canDelete: permissions.canDelete,
+                entityName: permissions.entityName,
+                entityType: permissions.entityType,
+            })
+            .from(users)
+            .leftJoin(roles, eq(users.roleId, roles.id))
+            .leftJoin(permissions, eq(roles.id, permissions.roleId))
+            .where(eq(users.id, userId));
+
+        return {
+            data: userPermissions,
+            error: null,
+        };
+    } catch (err) {
+        return {
+            data: null,
+            error: getErrorMessage(err),
+        };
+    }
+};
