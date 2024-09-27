@@ -33,24 +33,11 @@ CREATE TABLE IF NOT EXISTS "invitations" (
 	"status" varchar(20) DEFAULT 'pending' NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "permission_categories" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"name" varchar(50) NOT NULL,
-	"description" text
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "permission_entities" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"name" varchar(100) NOT NULL,
-	"description" text,
-	"category_id" integer,
-	CONSTRAINT "permission_entities_name_unique" UNIQUE("name")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "role_permissions" (
+CREATE TABLE IF NOT EXISTS "permissions" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"role_id" integer NOT NULL,
-	"entity_id" integer,
+	"entity_name" varchar(100) NOT NULL,
+	"entity_type" varchar(50) NOT NULL,
 	"can_create" boolean DEFAULT false,
 	"can_read" boolean DEFAULT true,
 	"can_update" boolean DEFAULT false,
@@ -131,19 +118,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "permission_entities" ADD CONSTRAINT "permission_entities_category_id_permission_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."permission_categories"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_role_id_roles_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."roles"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_entity_id_permission_entities_id_fk" FOREIGN KEY ("entity_id") REFERENCES "public"."permission_entities"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "permissions" ADD CONSTRAINT "permissions_role_id_roles_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."roles"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

@@ -30,6 +30,7 @@ import {
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 import { createRoleSchema, type CreateRoleSchema } from "@/lib/db/validations";
+import { createRole } from "../api/actions";
 import { CreateRoleForm } from "./create-role-form";
 
 export function CreateRoleDialog() {
@@ -43,12 +44,12 @@ export function CreateRoleDialog() {
 
     function onSubmit(input: CreateRoleSchema) {
         startCreateTransition(async () => {
-            // const { error } = await createBlog(input);
+            const { error } = await createRole(input);
 
-            // if (error) {
-            //     toast.error(error);
-            //     return;
-            // }
+            if (error) {
+                toast.error(error);
+                return;
+            }
 
             form.reset();
             setOpen(false);

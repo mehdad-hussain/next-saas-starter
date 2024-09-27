@@ -1,7 +1,7 @@
 import { hashPassword } from "@/lib/auth/session";
 import { stripe } from "../payments/stripe";
 import { db } from "./drizzle";
-import { permissionCategories, permissionEntities, rolePermissions, roles, teamMembers, teams, users } from "./schema";
+import { permissions, roles, teamMembers, teams, users } from "./schema";
 
 async function createStripeProducts() {
     console.log("Creating Stripe products and prices...");
@@ -55,35 +55,13 @@ async function seed() {
 
     console.log("Roles created.");
 
-    // Create permission categories
-    const [collectionCategory, singleCategory, pluginCategory, settingsCategory] = await db
-        .insert(permissionCategories)
-        .values([
-            { name: "collection", description: "Permissions for collections" },
-            { name: "single", description: "Permissions for single types" },
-            { name: "plugin", description: "Permissions for managing plugins" },
-            { name: "settings", description: "Permissions for application settings" },
-        ])
-        .returning();
-
-    console.log("Permission categories created.");
-
-    // Create permission entities (e.g., blog-post, site-settings)
-    const [blogPostEntity, siteSettingsEntity] = await db
-        .insert(permissionEntities)
-        .values([
-            { name: "blog-post", description: "Permissions for blog post", categoryId: collectionCategory.id },
-            { name: "site-settings", description: "Permissions for site-wide settings", categoryId: settingsCategory.id },
-        ])
-        .returning();
-
-    console.log("Permission entities created.");
-
-    // Assign permissions to roles for blog-post entity (under collection category)
-    await db.insert(rolePermissions).values([
+    // Insert permissions directly into the permissions table
+    await db.insert(permissions).values([
+        // Blog-post permissions for each role
         {
             roleId: adminRole.id,
-            entityId: blogPostEntity.id,
+            entityName: "blog-post",
+            entityType: "collection",
             canCreate: true,
             canRead: true,
             canUpdate: true,
@@ -91,7 +69,8 @@ async function seed() {
         },
         {
             roleId: editorRole.id,
-            entityId: blogPostEntity.id,
+            entityName: "blog-post",
+            entityType: "collection",
             canCreate: false,
             canRead: true,
             canUpdate: true,
@@ -99,7 +78,8 @@ async function seed() {
         },
         {
             roleId: authorRole.id,
-            entityId: blogPostEntity.id,
+            entityName: "blog-post",
+            entityType: "collection",
             canCreate: true,
             canRead: true,
             canUpdate: false,
@@ -107,7 +87,8 @@ async function seed() {
         },
         {
             roleId: ownerRole.id,
-            entityId: blogPostEntity.id,
+            entityName: "blog-post",
+            entityType: "collection",
             canCreate: true,
             canRead: true,
             canUpdate: true,
@@ -115,7 +96,8 @@ async function seed() {
         },
         {
             roleId: memberRole.id,
-            entityId: blogPostEntity.id,
+            entityName: "blog-post",
+            entityType: "collection",
             canCreate: false,
             canRead: true,
             canUpdate: false,
@@ -123,21 +105,19 @@ async function seed() {
         },
         {
             roleId: userRole.id,
-            entityId: blogPostEntity.id,
+            entityName: "blog-post",
+            entityType: "collection",
             canCreate: false,
             canRead: true,
             canUpdate: false,
             canDelete: false,
         },
-    ]);
 
-    console.log("Role permissions assigned for blog post.");
-
-    // Assign permissions to roles for site-settings entity (under settings category)
-    await db.insert(rolePermissions).values([
+        // Site-settings permissions for each role
         {
             roleId: adminRole.id,
-            entityId: siteSettingsEntity.id,
+            entityName: "site-settings",
+            entityType: "settings",
             canCreate: false,
             canRead: true,
             canUpdate: true,
@@ -145,7 +125,8 @@ async function seed() {
         },
         {
             roleId: editorRole.id,
-            entityId: siteSettingsEntity.id,
+            entityName: "site-settings",
+            entityType: "settings",
             canCreate: false,
             canRead: true,
             canUpdate: false,
@@ -153,7 +134,7 @@ async function seed() {
         },
     ]);
 
-    console.log("Role permissions assigned for site settings.");
+    console.log("Permissions assigned.");
 
     // Create users and assign them to each role
     const usersData = [
@@ -177,7 +158,7 @@ async function seed() {
                 })
                 .returning();
 
-            return user; // Return the single user object
+            return user;
         }),
     );
 
@@ -216,7 +197,7 @@ async function seed() {
         }),
     );
 
-    console.log("Team and team members created and all users assigned to them.");
+    console.log("Team members assigned to the team.");
 
     await createStripeProducts();
 }

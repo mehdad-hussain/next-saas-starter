@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { type GetRoleTableSchema } from "@/lib/db/validations";
+import { deleteRoles } from "../api/actions";
 
 interface DeleteRolesDialogProps extends React.ComponentPropsWithoutRef<typeof Dialog> {
     roles: Row<GetRoleTableSchema>["original"][];
@@ -42,14 +43,14 @@ export function DeleteRolesDialog({ roles, showTrigger = true, onSuccess, ...pro
 
     function onDelete() {
         startDeleteTransition(async () => {
-            // const { error } = await deleteRoles({
-            //     ids: roles.map((blog) => blog.id),
-            // });
+            const { error } = await deleteRoles({
+                ids: roles.map((role) => role.id),
+            });
 
-            // if (error) {
-            //     toast.error(error);
-            //     return;
-            // }
+            if (error) {
+                toast.error(error);
+                return;
+            }
 
             props.onOpenChange?.(false);
             toast.success("Roles deleted");

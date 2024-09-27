@@ -6,7 +6,6 @@ import { type UseFormReturn } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useUser } from "@/lib/auth";
 import { type CreateRoleSchema } from "@/lib/db/validations";
 
 interface CreateRoleFormProps extends Omit<React.ComponentPropsWithRef<"form">, "onSubmit"> {
@@ -16,7 +15,6 @@ interface CreateRoleFormProps extends Omit<React.ComponentPropsWithRef<"form">, 
 }
 
 export function CreateRoleForm({ form, onSubmit, children }: CreateRoleFormProps) {
-    const { user } = useUser();
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">

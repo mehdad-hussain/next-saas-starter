@@ -74,7 +74,7 @@ export function getColumns(): ColumnDef<GetRoleTableSchema>[] {
                         />
 
                         <div className="flex items-center space-x-2">
-                            <Link href={`/dashboard/roles/${row.original.id}`}>
+                            <Link href={`/dashboard/role/${row.original.id}`}>
                                 <Button aria-label="Edit role" variant="ghost" className="size-8 p-0">
                                     <PencilIcon className="size-4" aria-hidden="true" />
                                 </Button>

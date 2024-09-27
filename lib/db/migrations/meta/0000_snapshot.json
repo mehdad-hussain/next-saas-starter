@@ -1,5 +1,5 @@
 {
-  "id": "9b89f52e-6efc-48b2-8824-d6f7299d10d9",
+  "id": "12f18de2-5e21-48ce-bde5-e9ef91dee52a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -268,92 +268,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.permission_categories": {
-      "name": "permission_categories",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.permission_entities": {
-      "name": "permission_entities",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "category_id": {
-          "name": "category_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "permission_entities_category_id_permission_categories_id_fk": {
-          "name": "permission_entities_category_id_permission_categories_id_fk",
-          "tableFrom": "permission_entities",
-          "tableTo": "permission_categories",
-          "columnsFrom": [
-            "category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "permission_entities_name_unique": {
-          "name": "permission_entities_name_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
-        }
-      }
-    },
-    "public.role_permissions": {
-      "name": "role_permissions",
+    "public.permissions": {
+      "name": "permissions",
       "schema": "",
       "columns": {
         "id": {
@@ -368,11 +284,17 @@
           "primaryKey": false,
           "notNull": true
         },
-        "entity_id": {
-          "name": "entity_id",
-          "type": "integer",
+        "entity_name": {
+          "name": "entity_name",
+          "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
+        },
+        "entity_type": {
+          "name": "entity_type",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
         },
         "can_create": {
           "name": "can_create",
@@ -405,25 +327,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "role_permissions_role_id_roles_id_fk": {
-          "name": "role_permissions_role_id_roles_id_fk",
-          "tableFrom": "role_permissions",
+        "permissions_role_id_roles_id_fk": {
+          "name": "permissions_role_id_roles_id_fk",
+          "tableFrom": "permissions",
           "tableTo": "roles",
           "columnsFrom": [
             "role_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "role_permissions_entity_id_permission_entities_id_fk": {
-          "name": "role_permissions_entity_id_permission_entities_id_fk",
-          "tableFrom": "role_permissions",
-          "tableTo": "permission_entities",
-          "columnsFrom": [
-            "entity_id"
           ],
           "columnsTo": [
             "id"

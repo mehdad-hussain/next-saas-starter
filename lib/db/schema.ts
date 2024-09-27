@@ -1,37 +1,25 @@
 import { relations } from "drizzle-orm";
 import { boolean, integer, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 
-export const roles = pgTable("roles", {
-    id: serial("id").primaryKey(),
-    name: varchar("name", { length: 50 }).notNull().unique(), // e.g., admin, editor, author
-    description: text("description"),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-export const permissionCategories = pgTable("permission_categories", {
-    id: serial("id").primaryKey(),
-    name: varchar("name", { length: 50, enum: ["collection", "single", "plugin", "settings"] }).notNull(), // collection, single, plugin, settings
-    description: text("description"),
-});
-
-export const permissionEntities = pgTable("permission_entities", {
-    id: serial("id").primaryKey(),
-    name: varchar("name", { length: 100 }).notNull().unique(), // e.g., blog-post, plugin-xyz, site-settings
-    description: text("description"),
-    categoryId: integer("category_id").references(() => permissionCategories.id),
-});
-
-export const rolePermissions = pgTable("role_permissions", {
+export const permissions = pgTable("permissions", {
     id: serial("id").primaryKey(),
     roleId: integer("role_id")
         .notNull()
         .references(() => roles.id),
-    entityId: integer("entity_id").references(() => permissionEntities.id),
-    canCreate: boolean("can_create").default(false),
-    canRead: boolean("can_read").default(true),
-    canUpdate: boolean("can_update").default(false),
-    canDelete: boolean("can_delete").default(false),
+    entityName: varchar("entity_name", { length: 100 }).notNull(), // e.g., blog-post, plugin-xyz, site-settings
+    entityType: varchar("entity_type", { length: 50, enum: ["collection", "single", "plugin", "settings"] }).notNull(),
+    canCreate: boolean("can_create").default(false).notNull(),
+    canRead: boolean("can_read").default(true).notNull(),
+    canUpdate: boolean("can_update").default(false).notNull(),
+    canDelete: boolean("can_delete").default(false).notNull(),
+});
+
+export const roles = pgTable("roles", {
+    id: serial("id").primaryKey(),
+    name: varchar("name", { length: 50 }).notNull().unique(),
+    description: text("description"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const users = pgTable("users", {
@@ -115,14 +103,10 @@ export const blogPosts = pgTable("blog_posts", {
     deletedAt: timestamp("deleted_at"),
 });
 
-export const rolePermissionsRelations = relations(rolePermissions, ({ one }) => ({
+export const permissionsRelations = relations(permissions, ({ one }) => ({
     role: one(roles, {
-        fields: [rolePermissions.roleId],
+        fields: [permissions.roleId],
         references: [roles.id],
-    }),
-    entity: one(permissionEntities, {
-        fields: [rolePermissions.entityId],
-        references: [permissionEntities.id],
     }),
 }));
 
@@ -223,7 +207,6 @@ export type NewBlogPost = typeof blogPosts.$inferInsert;
 
 export type Role = typeof roles.$inferSelect;
 export type NewRole = typeof roles.$inferInsert;
-export type PermissionEntity = typeof permissionEntities.$inferSelect;
-export type NewPermissionEntity = typeof permissionEntities.$inferInsert;
-export type RolePermission = typeof rolePermissions.$inferSelect;
-export type NewRolePermission = typeof rolePermissions.$inferInsert;
+
+export type Permission = typeof permissions.$inferSelect;
+export type NewPermission = typeof permissions.$inferInsert;
