@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
+import { useUser } from "@/lib/auth";
 import { deleteBlogs } from "../api/actions";
 
 interface DeleteBlogsDialogProps extends React.ComponentPropsWithoutRef<typeof Dialog> {
@@ -42,12 +43,16 @@ interface DeleteBlogsDialogProps extends React.ComponentPropsWithoutRef<typeof D
 export function DeleteBlogsDialog({ blogs, showTrigger = true, onSuccess, disabled, ...props }: DeleteBlogsDialogProps) {
     const [isDeletePending, startDeleteTransition] = React.useTransition();
     const isDesktop = useMediaQuery("(min-width: 640px)");
+    const { user } = useUser();
 
     function onDelete() {
         startDeleteTransition(async () => {
-            const { error } = await deleteBlogs({
-                ids: blogs.map((blog) => blog.id),
-            });
+            const { error } = await deleteBlogs(
+                {
+                    ids: blogs.map((blog) => blog.id),
+                },
+                user?.id ?? 0,
+            );
 
             if (error) {
                 toast.error(error);

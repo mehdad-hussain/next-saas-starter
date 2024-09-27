@@ -60,7 +60,6 @@ const RoleEditForm = ({ roleData }: Props) => {
                 roleName: data.role.name,
                 entityType: rest.entityType as "collection" | "single" | "plugin" | "settings" | null,
             }));
-
             setCurrentUserPermissions(currentUserPermissions);
 
             form.reset(

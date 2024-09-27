@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
+import { useUser } from "@/lib/auth";
 import { updateBlogSchema, type UpdateBlogSchema } from "@/lib/db/validations";
 import { updateBlog } from "../api/actions";
 
@@ -22,6 +23,7 @@ interface UpdateBlogSheetProps extends React.ComponentPropsWithRef<typeof Sheet>
 
 export function UpdateBlogSheet({ blog, ...props }: UpdateBlogSheetProps) {
     const [isUpdatePending, startUpdateTransition] = React.useTransition();
+    const { user } = useUser();
 
     const form = useForm<UpdateBlogSchema>({
         resolver: zodResolver(updateBlogSchema),
@@ -44,10 +46,13 @@ export function UpdateBlogSheet({ blog, ...props }: UpdateBlogSheetProps) {
 
     function onSubmit(input: UpdateBlogSchema) {
         startUpdateTransition(async () => {
-            const { error } = await updateBlog({
-                id: blog.id,
-                ...input,
-            });
+            const { error } = await updateBlog(
+                {
+                    id: blog.id,
+                    ...input,
+                },
+                user?.id ?? 0,
+            );
 
             if (error) {
                 toast.error(error);

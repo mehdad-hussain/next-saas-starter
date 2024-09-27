@@ -26,6 +26,7 @@ import {
 import { getErrorMessage } from "@/lib/handle-error";
 import { formatDate } from "@/lib/utils";
 
+import { useUser } from "@/lib/auth";
 import usePermissionStore from "@/store/user-permission-store";
 import Image from "next/image";
 import { updateBlog } from "../api/actions";
@@ -115,6 +116,7 @@ export function getColumns(): ColumnDef<BlogPost>[] {
                 const [showUpdateBlogSheet, setShowUpdateBlogSheet] = React.useState(false);
                 const [showDeleteBlogsDialog, setShowDeleteBlogsDialog] = React.useState(false);
                 const { currentUserPermissions } = usePermissionStore();
+                const { user } = useUser();
 
                 const blogPostPermission = currentUserPermissions.find((permission) => permission.entityName === "blog-post");
 
@@ -147,10 +149,14 @@ export function getColumns(): ColumnDef<BlogPost>[] {
                                             onValueChange={(value) => {
                                                 startUpdateTransition(() => {
                                                     toast.promise(
-                                                        updateBlog({
-                                                            id: row.original.id,
-                                                            state: value as BlogPost["state"],
-                                                        }),
+                                                        updateBlog(
+                                                            {
+                                                                id: row.original.id,
+                                                                state: value as BlogPost["state"],
+                                                            },
+                                                            user?.id ?? 0,
+                                                            true,
+                                                        ),
                                                         {
                                                             loading: "Updating...",
                                                             success: "State updated",
@@ -165,7 +171,7 @@ export function getColumns(): ColumnDef<BlogPost>[] {
                                                     key={state}
                                                     value={state}
                                                     className="capitalize"
-                                                    disabled={isUpdatePending || !blogPostPermission?.canUpdate}
+                                                    disabled={!blogPostPermission?.canUpdate}
                                                 >
                                                     {state}
                                                 </DropdownMenuRadioItem>

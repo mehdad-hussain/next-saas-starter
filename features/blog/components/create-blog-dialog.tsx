@@ -53,7 +53,7 @@ export function CreateBlogDialog({ disabled }: Props) {
 
     function onSubmit(input: CreateBlogSchema) {
         startCreateTransition(async () => {
-            const { error } = await createBlog(input);
+            const { error } = await createBlog(input, user?.id ?? 0);
 
             if (error) {
                 toast.error(error);
