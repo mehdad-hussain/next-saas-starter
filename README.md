@@ -1,59 +1,47 @@
-# Next.js SaaS Starter
+# Next.js SaaS Starter - task for evatix
 
-This is a starter template for building a SaaS application using **Next.js** with support for authentication, Stripe integration for payments, and a dashboard for logged-in users.
+## Overview
+
+This is my interview task for [Evatix](https://evatix.com/) where I'm working on server side pagination, sorting, and filtering of blog post table.
+
+I also worked on role based authorization and permission management.
+
+At last I've updated the activity logging system.
 
 **Demo: [https://next-saas-start.vercel.app/](https://next-saas-start.vercel.app/)**
 
 <details>
-  <summary>Why did I make this?</summary>
-  
-  In 2020, I made a course called "React 2025" which showed how to build a SaaS application with Next.js, Stripe, and other tools.
-
-Well, it's almost 2025 and React 19 has brought so many amazing new features I didn't predict! This repo is a demonstration of the latest React and Next.js patterns. These patterns can drastically simplify some common tasks in building your SaaS, like building forms, talking to your database, and more.
-
-For example, React now has built in hooks like `useActionState` to handle inline form errors and pending states. React Server Actions can replace a lot of boilerplate code needed to call an API Route from the client-side. And finally, the React `use` hook combined with Next.js makes it incredibly easy to build a powerful `useUser()` hook.
+React now has built in hooks like `useActionState` to handle inline form errors and pending states. React Server Actions can replace a lot of boilerplate code needed to call an API Route from the client-side. And finally, the React `use` hook combined with Next.js makes it incredibly easy to build a powerful `useUser()` hook.
 
 We're able to fetch the user from our Postgres database in the root layout, but _not_ await the `Promise`. Instead, we forward the `Promise` to a React context provider, where we can "unwrap" it and awaited the streamed in data. This means we can have the best of both worlds: easy code to fetch data from our database (e.g. `getUser()`) and a React hook we can use in Client Components (e.g. `useUser()`).
-
-Fun fact: the majority of the UI for this application was built with [v0](https://v0.dev) 🤯 [More details here](https://x.com/leeerob/status/1835777934361084316) if you want to learn about this repo.
 
 </details>
 
 ## Features
 
-- Marketing landing page (`/`) with animated Terminal element
-- Pricing page (`/pricing`) which connects to Stripe Checkout
-- Dashboard pages with CRUD operations on users/teams
-- Basic RBAC with Owner and Member roles
-- Subscription management with Stripe Customer Portal
-- Email/password authentication with JWTs stored to cookies
-- Global middleware to protect logged-in routes
-- Local middleware to protect Server Actions or validate Zod schemas
-- Activity logging system for any user events
+-   Ignored stipe webhooks and pricing system of starter kit as it was not the goal of this task
+-   Server side pagination, sorting, and tag filtering
+-   Role based authorization and permission management
+-   Activity logging system for any user events
 
 ## Tech Stack
 
-- **Framework**: [Next.js](https://nextjs.org/)
-- **Database**: [Postgres](https://www.postgresql.org/)
-- **ORM**: [Drizzle](https://orm.drizzle.team/)
-- **Payments**: [Stripe](https://stripe.com/)
-- **UI Library**: [shadcn/ui](https://ui.shadcn.com/)
+-   **Framework**: [Next.js](https://nextjs.org/)
+-   **Database**: [Postgres](https://www.postgresql.org/)
+-   **ORM**: [Drizzle](https://orm.drizzle.team/)
+-   **UI Library**: [shadcn/ui](https://ui.shadcn.com/)
 
 ## Getting Started
 
 ```bash
-git clone https://github.com/leerob/next-saas-starter
+git clone
 cd next-saas-starter
-pnpm install
+pnpm install or yarn install
 ```
 
 ## Running Locally
 
-Use the included setup script to create your `.env` file:
-
-```bash
-pnpm db:setup
-```
+Use the included setup script to create your `.env` file: add your postgres database URL as POSTGRES_URL
 
 Then, run the database migrations and seed the database with a default user and team:
 
@@ -62,10 +50,20 @@ pnpm db:migrate
 pnpm db:seed
 ```
 
-This will create the following user and team:
+This will create the following users and team:
 
-- User: `test@test.com`
-- Password: `admin123`
+-   User: `admin@test.com`
+-   Password: `admin123`
+-   User: `editor@test.com`
+-   Password: `editor123`
+-   User: `author@test.com`
+-   Password: `author123`
+-   User: `owner@test.com`
+-   Password: `owner123`
+-   User: `member@test.com`
+-   Password: `member123`
+-   User: `user@test.com`
+-   Password: `user123`
 
 You can, of course, create new users as well through `/sign-up`.
 
@@ -76,20 +74,6 @@ pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser to see the app in action.
-
-Optionally, you can listen for Stripe webhooks locally through their CLI to handle subscription change events:
-
-```bash
-stripe listen --forward-to localhost:3000/api/stripe/webhook
-```
-
-## Testing Payments
-
-To test Stripe payments, use the following test card details:
-
-- Card Number: `4242 4242 4242 4242`
-- Expiration: Any future date
-- CVC: Any 3-digit number
 
 ## Going to Production
 
@@ -116,11 +100,3 @@ In your Vercel project settings (or during deployment), add all the necessary en
 3. `STRIPE_WEBHOOK_SECRET`: Use the webhook secret from the production webhook you created in step 1.
 4. `POSTGRES_URL`: Set this to your production database URL.
 5. `AUTH_SECRET`: Set this to a random string. `openssl rand -base64 32` will generate one.
-
-## Other Templates
-
-While this template is intentionally minimal and to be used as a learning resource, there are other paid versions in the community which are more full-featured:
-
-- https://achromatic.dev
-- https://shipfa.st
-- https://makerkit.dev
