@@ -6,6 +6,7 @@ import * as React from "react";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 
+import { type GetRoleTableSchema } from "@/lib/db/validations";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { getAllRolesWithUserCount } from "../api/actions";
 import { getColumns } from "./roles-table-columns";
@@ -20,7 +21,7 @@ export function RolesTable({ rolesPromise }: RolesTableProps) {
     const columns = React.useMemo(() => getColumns(), []);
 
     const table = useReactTable({
-        data: roleData,
+        data: roleData as GetRoleTableSchema[],
         columns,
         enableRowSelection: true,
         getCoreRowModel: getCoreRowModel(),
