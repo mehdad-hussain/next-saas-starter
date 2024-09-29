@@ -79,12 +79,6 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to see the a
 
 When you're ready to deploy your SaaS application to production, follow these steps:
 
-### Set up a production Stripe webhook
-
-1. Go to the Stripe Dashboard and create a new webhook for your production environment.
-2. Set the endpoint URL to your production API route (e.g., `https://yourdomain.com/api/stripe/webhook`).
-3. Select the events you want to listen for (e.g., `checkout.session.completed`, `customer.subscription.updated`).
-
 ### Deploy to Vercel
 
 1. Push your code to a GitHub repository.
